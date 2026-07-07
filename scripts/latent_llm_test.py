@@ -19,8 +19,8 @@ import sys
 import numpy as np
 
 sys.path.insert(0, "src")
-from PRAMA_Protokol.ingest import load_sessions
-from PRAMA_Protokol.omega import omega_sessions
+from aptadynamic_llm.ingest import load_sessions
+from aptadynamic_llm.omega import omega_sessions
 
 # Kernel: the certified package. Never a local copy (AS-1 P7).
 from prama_protokol import KernelConfig, project
