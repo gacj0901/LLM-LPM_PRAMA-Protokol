@@ -1,7 +1,9 @@
-# Aptadynamic LLM-LPM_PRAMA-Protokol
+# Aptadynamic LLM-SVM_PRAMA-Protokol
+LLM Structural Viability Monitor
+
 
 **LLM domain implementation of the PRAMA Protokol (exploratory draft): structural
-viability of generation sessions from token-level observables.**
+viability of generation sessions from token-level observables and Early Warning Signals of Operational Degradation in Generative Trajectories**
 
 G.A.C.J. — ORCID: [0009-0009-5649-1359](https://orcid.org/0009-0009-5649-1359)
 Part of the **AptadynamiK** program.
