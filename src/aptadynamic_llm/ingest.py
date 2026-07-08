@@ -1,6 +1,9 @@
-"""Ingesta LLM: sesiones raw_json → stream canónico por token.
+"""LLM ingest: raw JSON sessions to canonical token rows.
 
-Canónico: session_id, model, pos, surprisal, entropy, gap, finish_reason.
+Canonical rows preserve the source ``session_id`` and add ``generation_id`` as
+the unit analyzed by the observation interface. A one-turn raw file keeps
+``generation_id == session_id``; multi-turn files get one generation id per
+turn so independent completions are never interleaved by position.
 """
 
 from __future__ import annotations
@@ -19,16 +22,20 @@ def load_sessions(root: str) -> pd.DataFrame:
             d = json.loads(f.read_text(encoding="utf-8"))
         except Exception:
             continue
-        if "turns" not in d:
+        turns = d.get("turns")
+        if not turns:
             continue
         sid = d.get("session_id", f.stem)
         model = d.get("model", "")
-        for turn in d["turns"]:
+        for turn_index, turn in enumerate(turns):
             toks = turn.get("tokens") or []
             fr = turn.get("finish_reason", "")
+            generation_id = sid if len(turns) == 1 else f"{sid}:turn{turn_index:03d}"
             for i, t in enumerate(toks):
                 rows.append({
                     "session_id": sid,
+                    "generation_id": generation_id,
+                    "turn_index": turn_index,
                     "model": model,
                     "pos": i,
                     "surprisal": -t["top1_logprob"],

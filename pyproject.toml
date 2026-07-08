@@ -5,9 +5,16 @@ description = "LLM domain implementation of the PRAMA Protokol (exploratory draf
 requires-python = ">=3.10"
 dependencies = ["pandas>=2.0", "numpy>=1.24", "prama-protokol"]
 
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
