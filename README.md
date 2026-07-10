@@ -3,7 +3,8 @@ LLM Structural Viability Monitor
 
 
 **LLM domain implementation of the PRAMA Protokol (exploratory draft): structural
-viability of generation sessions from token-level observables and Early Warning Signals of Operational Degradation in Generative Trajectories**
+viability of generation sessions from token-level observables and preregistered
+final-state discrimination of operational degradation in generative trajectories**
 
 G.A.C.J. — ORCID: [0009-0009-5649-1359](https://orcid.org/0009-0009-5649-1359)
 Part of the **AptadynamiK** program.
@@ -23,7 +24,9 @@ kernel** projects the stream onto Γ and flags **latent collapse** — the sessi
 generates while its structural margin is being consumed.
 
 First target outcome: `finish_reason = "length"` vs `"stop"` — aptadynamically, the
-failure of the **resolution** phase: the session that cannot conclude.
+failure of the **resolution** phase: the session that cannot conclude. Because this
+outcome is known only at the final token, E-P1 is post-hoc state discrimination, not a
+claim of token-localized early warning.
 
 ## Architecture (AS-1 P7 — enforced by dependency, not by claim)
 
@@ -32,7 +35,8 @@ sessions (raw json)                       aptadynamic_llm.ingest
   → token stream (surprisal, pos, ...)    aptadynamic_llm.omega   ← the ONLY
   → (ω, ω̂) strictly causal                                          domain part
   → Γ = (Δ, Ξ, λ, Θ, M, G), latent        prama_protokol.project  ← certified kernel,
-  → occupancy, baselines, permutation     scripts/latent_llm_test    zero local copies
+  → certified window summaries            scripts/score_sessions_prama
+  → D6 gates + sole verdict                 scripts/analyze_ep1.py
 ```
 
 There is deliberately **no projection module in this repository**: the kernel is imported
@@ -59,16 +63,44 @@ retained as documented sensitivity.
 The division of labor mirrors the electrical-grid finding: when degeneration is
 structural rather than volumetric, the accumulator sees what activity monitoring cannot.
 Compliance: the interface's Δ **passes the C3 degeneration statistic**
-(r_Δω ≈ −0.03) via the Engine's compliance module, which the study script runs and
-enforces before reporting any result.
+(r_Δω = −0.09194754 with the seed-7 structural corpus and `prama-protokol==0.1.0`)
+via the Engine's compliance module, which the study script runs and enforces before
+reporting any result.
 
-## Quick start
+## Synthetic wiring check
 
 ```bash
 pip install -e .                                   # pulls prama-protokol
 python examples/make_synthetic.py structural data_s
 python scripts/latent_llm_test.py data_s
 ```
+
+This is a wiring test, not confirmatory evidence.
+
+## E-P1 pipeline (Hermes 3 8B through Ollama)
+
+```bash
+# Pilot corpus. The prompt suite is an explicit, versioned JSON/JSONL/TXT file.
+python scripts/collect_ollama.py --pilot --model hermes3:8b --n 40 \
+  --seed-per-index --prompts prompts_ep1.jsonl --out data_pilot
+
+# After freezing the pilot-derived num_predict cap in PREREGISTRATION_P1.md:
+python scripts/collect_ollama.py --confirmatory --model hermes3:8b --n 400 \
+  --num-predict <frozen-cap> --seed-per-index \
+  --prompts prompts_ep1.jsonl --out data_confirmatory
+
+python scripts/analyze_ep1.py \
+  --sessions-dir data_confirmatory --out outputs/ep1
+```
+
+`analyze_ep1.py` is the only authoritative verdict path. It checks the frozen collection
+identity, runs C3, applies the power gate before inspecting scores, validates inputs, and
+evaluates permutation + AUROC + TPR at the train-calibrated FPR against exactly four
+baselines. It prints `positive`, `honest_null`, `interface_failure`, or the pre-verdict
+state `underpowered`. Component scripts cannot establish the confirmatory claim.
+
+The confirmatory channel is only `latent_occupancy`; `delta`, `xi`, and `neg_M` remain
+separate exploratory/diagnostic channels.
 
 ## Conceptual foundation of the domain
 

@@ -1,0 +1,67 @@
+"""Synthetic wiring test only; this is not empirical evidence for E-P1."""
+
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+from aptadynamic_llm.evaluation.state_discrimination_metrics import auroc
+from scripts.evaluate_state_discrimination import load_examples, load_labels
+from scripts.score_sessions_prama import main as score_main, stage_sessions
+from scripts.validate_state_discrimination_inputs import validate_inputs
+
+
+def test_synthetic_structural_corpus_wires_kernel_scorer_validator_and_evaluator(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    source = tmp_path / "structural"
+    scored = tmp_path / "ep1"
+    subprocess.run(
+        [sys.executable, str(root / "examples" / "make_synthetic.py"), "structural", str(source)],
+        check=True,
+        cwd=root,
+        capture_output=True,
+        text=True,
+    )
+
+    assert score_main(["--sessions-dir", str(source), "--out", str(scored)]) == 0
+    manifest = json.loads((scored / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["statistics"]["C3"]["r_delta_omega"] == pytest.approx(
+        -0.09194754007715042, abs=1e-12
+    )
+    raw_paths = sorted((scored / "sessions").rglob("raw.json"))
+    labels_path = scored / "labels.csv"
+    report = validate_inputs(labels_path, raw_paths)
+    assert report["valid"], report["errors"]
+    assert report["primary_score_range"] > 0.0
+
+    labels = load_labels(labels_path)
+    examples = load_examples(raw_paths, labels)
+    test = [row for row in examples if row["split"] == "test"]
+    latent_auc = auroc([row["scores"]["latent_occupancy"] for row in test], [row["label"] for row in test])
+    assert latent_auc > 0.75
+
+    first = json.loads(raw_paths[0].read_text(encoding="utf-8"))
+    summary = first["turns"][-1]["summary"]
+    assert {"latent_occupancy", "delta", "xi", "M", "G", "theta", "stratum"}.issubset(summary)
+    assert "boundary_pressure" not in summary
+
+
+def test_scorer_rejects_mixed_model_corpus(tmp_path):
+    for index, model in enumerate(("model-a", "model-b")):
+        payload = {
+            "session_id": f"s{index}",
+            "model": model,
+            "turns": [
+                {
+                    "finish_reason": "stop",
+                    "tokens": [{"top1_logprob": -0.5} for _ in range(40)],
+                }
+            ],
+        }
+        (tmp_path / f"s{index}.json").write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ValueError, match="exactly one non-empty model"):
+        stage_sessions(tmp_path, min_sessions=0)
