@@ -25,8 +25,8 @@ generates while its structural margin is being consumed.
 
 First target outcome: `finish_reason = "length"` vs `"stop"` — aptadynamically, the
 failure of the **resolution** phase: the session that cannot conclude. Because this
-outcome is known only at the final token, E-P1 is post-hoc state discrimination, not a
-claim of token-localized early warning.
+outcome is known only at the final token, E-P1 is post-hoc state discrimination now;
+event-localized early warning is declared future work, not a confirmatory claim.
 
 ## Architecture (AS-1 P7 — enforced by dependency, not by claim)
 
@@ -70,7 +70,7 @@ reporting any result.
 ## Synthetic wiring check
 
 ```bash
-pip install -e .                                   # pulls prama-protokol
+pip install -e .                                   # installs the local project plus the Git dependency
 python examples/make_synthetic.py structural data_s
 python scripts/latent_llm_test.py data_s
 ```

@@ -96,9 +96,11 @@ and be pre-registered.
   train-calibrated target FPR 0.10.
 - **Honest null:** signal present but not exceeding baselines → published as a negative
   result (ER-style).
-- **Interface failure:** C3 fails on the real stream → the diagnosis is O_D, the study is
-  invalid, a corrected interface opens a NEW study citing this one. The kernel is not
-  touched.
+- **Interface failure:** any failure in the frozen analysis interface before a
+  confirmatory verdict is emitted, including D7 collection identity failure, preflight
+  outcome/power failure, scoring/validation/input-wiring failure, or C3 failure on the
+  real stream → the diagnosis is O_D, the study is invalid, a corrected interface opens
+  a NEW study citing this one. The kernel is not touched.
 - **Authoritative analysis artifact:** `scripts/analyze_ep1.py` alone emits the D6 gates
   and terminal verdict. Outputs from exploratory scripts cannot establish the claim.
 - **Terminal verdict:** positive / honest null / interface failure. `underpowered` is a

@@ -3,7 +3,11 @@ name = "aptadynamic-llm"
 version = "0.0.1"
 description = "LLM domain implementation of the PRAMA Protokol (exploratory draft): structural viability of generation sessions from token-level observables"
 requires-python = ">=3.10"
-dependencies = ["pandas>=2.0", "numpy>=1.24", "prama-protokol"]
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "prama-protokol @ git+https://github.com/gacj0901/prama-protokol.git#subdirectory=PRAMA-Protokol-py",
+]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
@@ -17,4 +21,4 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "."]
